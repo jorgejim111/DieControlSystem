@@ -41,24 +41,23 @@ class UserModel:
         )
         return self.db.fetch_one(query, (user_id,))
     
-    def create_user(self, user_id: int, username: str, email: str, password: str, worker_id: Optional[int] = None) -> bool:
+    def create_user(self, username: str, email: str, password: str, worker_id: Optional[int] = None) -> bool:
         """Crea un nuevo usuario"""
         # Hash de la contraseña
         hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         
         query = """
-            INSERT INTO {user} ({id}, {username}, {email}, {password}, {worker_id}, {create_time})
-            VALUES (%s, %s, %s, %s, %s, NOW())
+            INSERT INTO {user} ({username}, {email}, {password}, {worker_id}, {create_time})
+            VALUES (%s, %s, %s, %s, NOW())
         """.format(
             user=Tables.USER,
-            id=Columns.Users.ID,
             username=Columns.Users.USERNAME,
             email=Columns.Users.EMAIL,
             password=Columns.Users.PASSWORD,
             worker_id=Columns.Users.WORKER_ID,
             create_time=Columns.Users.CREATE_TIME
         )
-        return bool(self.db.execute_query(query, (user_id, username, email, hashed, worker_id)))
+        return bool(self.db.execute_query(query, (username, email, hashed, worker_id)))
     
     def update_user(self, user_id: int, username: str, email: str, worker_id: Optional[int] = None) -> bool:
         """Actualiza un usuario existente"""
@@ -134,26 +133,35 @@ class UserModel:
         return self.db.fetch_all(query)
     
     def validate_login(self, username: str, password: str) -> Optional[Dict]:
-        """Valida las credenciales de un usuario"""
-        query = """
-            SELECT {id}, {username}, {email}, {password}
-            FROM {user}
-            WHERE {username} = %s
-        """.format(
-            user=Tables.USER,
-            id=Columns.Users.ID,
-            username=Columns.Users.USERNAME,
-            email=Columns.Users.EMAIL,
-            password=Columns.Users.PASSWORD
-        )
+        """
+        Valida las credenciales del usuario
+        
+        Args:
+            username (str): Nombre de usuario
+            password (str): Contraseña del usuario
+            
+        Returns:
+            Optional[Dict]: Datos del usuario si las credenciales son válidas, None si no lo son
+        """
+        query = f"""
+            SELECT u.*, w.{Columns.Workers.NAME} as worker_name 
+            FROM {Tables.USER} u 
+            LEFT JOIN {Tables.WORKERS} w ON u.{Columns.Users.WORKER_ID} = w.{Columns.Workers.ID} 
+            WHERE u.{Columns.Users.USERNAME} = %s
+        """
+        
         user = self.db.fetch_one(query, (username,))
         
-        if user and bcrypt.checkpw(password.encode('utf-8'), user[Columns.Users.PASSWORD].encode('utf-8')):
-            return {
-                Columns.Users.ID: user[Columns.Users.ID],
-                Columns.Users.USERNAME: user[Columns.Users.USERNAME],
-                Columns.Users.EMAIL: user[Columns.Users.EMAIL]
-            }
+        if not user:
+            return None
+            
+        stored_password = user[Columns.Users.PASSWORD].encode('utf-8')
+        
+        if bcrypt.checkpw(password.encode('utf-8'), stored_password):
+            # No devolver la contraseña en el diccionario
+            user.pop(Columns.Users.PASSWORD, None)
+            return user
+            
         return None
     
     def get_user_roles(self, user_id: int) -> List[Dict]:

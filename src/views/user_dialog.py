@@ -28,15 +28,6 @@ class UserDialog(QDialog):
         
         layout = QVBoxLayout(self)
         
-        # ID de Usuario
-        idLayout = QHBoxLayout()
-        idLabel = QLabel("ID:")
-        self.idInput = QLineEdit()
-        self.idInput.setPlaceholderText("Ingrese el ID del usuario")
-        idLayout.addWidget(idLabel)
-        idLayout.addWidget(self.idInput)
-        layout.addLayout(idLayout)
-        
         # Username
         usernameLayout = QHBoxLayout()
         usernameLabel = QLabel("Username:")
@@ -120,7 +111,6 @@ class UserDialog(QDialog):
         """Carga los datos del usuario para edición"""
         user = self.user_model.get_user_by_id(self.user_id)
         if user:
-            self.idInput.setText(str(user['id_user']))
             self.usernameInput.setText(user['username'])
             self.emailInput.setText(user['email'])
             
@@ -129,16 +119,9 @@ class UserDialog(QDialog):
                 index = self.workerCombo.findData(user['id_worker'])
                 if index >= 0:
                     self.workerCombo.setCurrentIndex(index)
-            
-            # Deshabilitar el campo ID en modo edición
-            self.idInput.setEnabled(False)
     
     def validateInputs(self):
         """Valida los campos de entrada"""
-        if not self.idInput.text():
-            QMessageBox.warning(self, "Error", "Por favor ingrese el ID del usuario")
-            return False
-        
         if not self.usernameInput.text().strip():
             QMessageBox.warning(self, "Error", "Username is required")
             return False
@@ -168,7 +151,6 @@ class UserDialog(QDialog):
         email = self.emailInput.text().strip()
         password = self.passwordInput.text().strip()
         worker_id = self.workerCombo.currentData()
-        user_id = int(self.idInput.text()) if self.idInput.text() else None
         
         try:
             if self.user_id:
@@ -178,7 +160,7 @@ class UserDialog(QDialog):
                     self.user_model.update_password(self.user_id, password)
             else:
                 # Crear nuevo usuario
-                success = self.user_model.create_user(user_id, username, email, password, worker_id)
+                success = self.user_model.create_user(username, email, password, worker_id)
             
             if success:
                 self.accept()

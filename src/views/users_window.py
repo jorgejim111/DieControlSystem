@@ -138,8 +138,8 @@ class UsersWindow(QMainWindow):
         
         # Tabla de usuarios
         self.usersTable = QTableWidget()
-        self.usersTable.setColumnCount(5)
-        self.usersTable.setHorizontalHeaderLabels(["Username", "Email", "Worker", "Created", "ID"])
+        self.usersTable.setColumnCount(4)
+        self.usersTable.setHorizontalHeaderLabels(["Username", "Email", "Worker", "Created"])
         
         # Configurar la tabla
         header = self.usersTable.horizontalHeader()
@@ -147,8 +147,6 @@ class UsersWindow(QMainWindow):
         header.setSectionResizeMode(1, QHeaderView.Stretch)  # Email
         header.setSectionResizeMode(2, QHeaderView.Stretch)  # Worker
         header.setSectionResizeMode(3, QHeaderView.Stretch)  # Created
-        header.setSectionResizeMode(4, QHeaderView.Fixed)    # ID
-        self.usersTable.setColumnWidth(4, 50)  # ID width
         
         self.usersTable.setSelectionBehavior(QTableWidget.SelectRows)
         self.usersTable.setSelectionMode(QTableWidget.SingleSelection)
@@ -183,9 +181,6 @@ class UsersWindow(QMainWindow):
             # Created
             create_time = user['create_time'].strftime('%Y-%m-%d %H:%M:%S') if user['create_time'] else ''
             self.usersTable.setItem(row, 3, QTableWidgetItem(create_time))
-            
-            # ID
-            self.usersTable.setItem(row, 4, QTableWidgetItem(str(user['id_user'])))
             
             # Guardar el ID del usuario
             self.userIds[row] = user['id_user']
@@ -237,14 +232,11 @@ class UsersWindow(QMainWindow):
     
     def showUserRolesDialog(self):
         """Muestra el diálogo para gestionar roles del usuario"""
-        selectedRows = self.usersTable.selectedItems()
-        if not selectedRows:
+        userId = self.getSelectedUserId()
+        if not userId:
             QMessageBox.warning(self, "Error", "Por favor seleccione un usuario")
             return
         
-        row = selectedRows[0].row()
-        user_id = int(self.usersTable.item(row, 4).text())
-        username = self.usersTable.item(row, 0).text()
-        
-        dialog = UserRolesDialog(self, user_id, username)
+        username = self.usersTable.item(self.usersTable.currentRow(), 0).text()
+        dialog = UserRolesDialog(self, userId, username)
         dialog.exec_() 

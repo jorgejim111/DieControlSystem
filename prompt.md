@@ -1,104 +1,151 @@
-# DieControlSystem - Guía de Desarrollo
+# Die Control System
 
-## Contexto del Proyecto
-Sistema de control y gestión para Die Control System, desarrollado en Python con PyQt5 y MySQL.
+## Descripción General
+Sistema de control y gestión para Masternet, diseñado para administrar trabajadores, posiciones, roles y troqueles.
 
-## Estándares de Diseño
+## Características Principales
 
-### 1. Interfaz de Usuario
-#### Ventanas Principales
-- Heredan de `QMainWindow`
-- Tamaño mínimo: 1000x600
-- Estructura:
-  * Frame superior con título y logo de Masternet
-  * Frame principal con contenido
-  * Barra de herramientas con botones principales
+### Sistema de Autenticación
+- Ventana de login con diseño moderno
+- Validación de credenciales contra base de datos MySQL
+- Usuario administrador por defecto:
+  - Username: admin
+  - Password: admin123
 
-#### Elementos Visuales
-- **Frame Superior**:
-  * Fondo blanco
-  * Borde: #cccccc
-  * Título: 16px, negrita, color #333
-  * Logo Masternet: 108x30px
+### Interfaz Principal
+- Diseño moderno y consistente
+- Nombre del trabajador actual en tamaño 36px
+- Logo de Masternet en la esquina superior derecha
+- Sistema MDI (Multiple Document Interface) para gestionar múltiples ventanas
+- Menú organizado por categorías
 
-- **Frame Principal**:
-  * Fondo blanco
-  * Borde: #cccccc
-  * Radio de borde: 5px
-  * Padding: 10px
+### Módulos del Sistema
 
-- **Tablas**:
-  * Encabezados: #f8f9fa
-  * Bordes: #dee2e6
-  * Selección de fila completa
-  * Columna de acciones (ancho fijo: 100px)
-  * Botones de acción en fila:
-    - Editar: ✏️ (amarillo #ffc107)
-    - Eliminar: ❌ (rojo #dc3545)
+#### 1. Gestión de Usuarios
+- Crear, editar y eliminar usuarios
+- Asignar trabajadores a usuarios
+- Gestión de contraseñas seguras (hash bcrypt)
+- Asignación de roles
 
-- **Botones Principales**:
-  * Color principal: #0056b3
-  * Color hover: #003d80
-  * Botón eliminar: #dc3545
-  * Padding: 8px 15px
-  * Radio de borde: 3px
-  * Ancho mínimo: 100px
+#### 2. Gestión de Trabajadores
+- Registro completo de trabajadores
+- Asignación de posiciones
+- Historial de cambios
 
-### 2. Diálogos
-- Heredan de `QDialog`
-- Modal: True
-- Ancho mínimo: 400px
-- Campos:
-  * Labels: ancho mínimo 80px
-  * Inputs: padding 5px, borde #cccccc
-  * Validación antes de guardar
-- Botones:
-  * Save: azul (#0056b3)
-  * Cancel: gris (#6c757d)
+#### 3. Gestión de Posiciones
+- Mantenimiento de catálogo de posiciones
+- Relación con trabajadores
 
-### 3. Arquitectura
-#### Estructura de Carpetas
+#### 4. Gestión de Roles
+- Control de roles del sistema
+- Asignación de roles a usuarios
+- Permisos basados en roles
+
+#### 5. Gestión de Troqueles (Dies)
+- [Módulo en desarrollo]
+
+## Estructura de la Base de Datos
+
+### Tablas Principales
+1. `user`
+   - id_user (PK)
+   - username
+   - email
+   - password (hashed)
+   - id_worker (FK)
+   - create_time
+
+2. `workers`
+   - id_worker (PK)
+   - name
+   - id_position (FK)
+
+3. `positions`
+   - id_positions (PK)
+   - position
+
+4. `roles`
+   - id_rol (PK)
+   - rol
+
+5. `roles_user`
+   - id_rol (FK)
+   - id_user (FK)
+
+## Tecnologías Utilizadas
+
+### Frontend
+- PyQt5 para la interfaz gráfica
+- Diseño moderno con estilos CSS
+- Sistema MDI para gestión de ventanas
+
+### Backend
+- Python 3.x
+- MySQL para la base de datos
+- bcrypt para hash de contraseñas
+
+### Características de la Interfaz
+- Diseño consistente en todas las ventanas
+- Paleta de colores corporativa
+- Validaciones en tiempo real
+- Mensajes de error y éxito informativos
+- Interfaz responsiva
+
+## Guía de Inicio
+
+1. Ejecutar el sistema:
+   ```bash
+   python src/main.py
+   ```
+
+2. Iniciar sesión:
+   - Usar credenciales de administrador por defecto
+   - El sistema creará automáticamente el usuario admin si no existe
+
+3. Navegación:
+   - Usar el menú Database para acceder a todas las funciones
+   - Las ventanas se abren dentro del área MDI
+   - Se pueden tener múltiples ventanas abiertas simultáneamente
+
+## Estructura del Proyecto
+
 ```
 src/
-├── models/         # Modelos de datos
-├── views/          # Interfaces de usuario
-├── database/       # Conexión y queries
-└── assets/         # Recursos (iconos, imágenes)
+├── main.py
+├── database/
+│   ├── connection.py
+│   └── database_schema.py
+├── models/
+│   ├── user_model.py
+│   ├── worker_model.py
+│   ├── position_model.py
+│   └── role_model.py
+└── views/
+    ├── login_window.py
+    ├── main_window.py
+    ├── users_window.py
+    ├── workers_window.py
+    ├── positions_window.py
+    └── roles_window.py
 ```
 
-#### Patrones
-- MVC (Model-View-Controller)
-- Singleton para conexión DB
-- Validación en modelos y vistas
+## Mantenimiento y Desarrollo
 
-### 4. Base de Datos
-#### Tablas Implementadas
-- `users`: Gestión de usuarios
-- `positions`: Cargos/posiciones
-- `workers`: Trabajadores
-- `rols`: Roles del sistema
+### Agregar Nuevos Módulos
+1. Crear el modelo en `src/models/`
+2. Crear la vista en `src/views/`
+3. Agregar la entrada en el menú principal
+4. Actualizar el esquema de base de datos si es necesario
 
-## Estado Actual
-### Módulos Completados
-1. Gestión de Usuarios
-2. Gestión de Posiciones
-3. Gestión de Roles
-4. Gestión de Trabajadores
-
-### En Desarrollo
-- Sistema de jerarquía de roles y tareas:
-  * Tabla `role_hierarchy`
-  * Tabla `tasks`
-  * Tabla `role_tasks`
-
-## Próximos Pasos
-1. Implementar sistema de tareas por rol
-2. Desarrollar jerarquía de roles
-3. Integrar permisos basados en roles
-
-## Notas Importantes
-- Mantener consistencia en nombrado (CamelCase para clases, snake_case para métodos)
+### Estándares de Código
+- Usar Type Hints en Python
 - Documentar métodos y clases
-- Manejar errores con mensajes claros al usuario
-- Validar datos antes de operaciones DB
-- Actualizar este prompt al final de cada sesión de desarrollo 
+- Seguir PEP 8 para estilo de código
+- Mantener consistencia en el diseño de UI
+
+## Próximas Características
+- Implementación completa del módulo de Troqueles
+- Sistema de reportes
+- Dashboard con estadísticas
+- Exportación de datos
+- Historial de cambios 

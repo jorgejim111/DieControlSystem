@@ -30,16 +30,6 @@ class RoleDialog(QDialog):
         # Campos de entrada
         formLayout = QVBoxLayout()
         
-        # ID Role (solo visible al crear nuevo rol)
-        if not self.roleId:
-            idLayout = QHBoxLayout()
-            idLabel = QLabel("ID:")
-            self.idInput = QLineEdit()
-            self.idInput.setPlaceholderText("Enter role ID")
-            idLayout.addWidget(idLabel)
-            idLayout.addWidget(self.idInput)
-            formLayout.addLayout(idLayout)
-        
         # Role Name
         nameLayout = QHBoxLayout()
         nameLabel = QLabel("Role:")
@@ -105,20 +95,9 @@ class RoleDialog(QDialog):
     
     def validateInputs(self):
         """Valida los campos del formulario"""
-        if not self.roleId and not self.idInput.text().strip():
-            QMessageBox.warning(self, "Validation Error", "Role ID is required")
-            return False
-            
         if not self.nameInput.text().strip():
             QMessageBox.warning(self, "Validation Error", "Role name is required")
             return False
-            
-        if not self.roleId:
-            try:
-                int(self.idInput.text().strip())
-            except ValueError:
-                QMessageBox.warning(self, "Validation Error", "Role ID must be a number")
-                return False
         return True
     
     def saveRole(self):
@@ -136,9 +115,8 @@ class RoleDialog(QDialog):
                 roleName
             )
         else:
-            # Crear nuevo rol con ID manual
-            roleId = int(self.idInput.text().strip())
-            success = self.roleModel.createRole(roleId, roleName)
+            # Crear nuevo rol (el ID será auto incrementable)
+            success = self.roleModel.createRole(roleName)
         
         if success:
             self.accept()
