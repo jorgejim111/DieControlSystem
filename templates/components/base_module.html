@@ -1,0 +1,69 @@
+<div class="module-container">
+    <!-- Toolbar -->
+    <div class="module-toolbar mb-3">
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary" onclick="moduleNew()">
+                <i class="fas fa-plus"></i> Nuevo
+            </button>
+            <button type="button" class="btn btn-success" onclick="moduleSave()">
+                <i class="fas fa-save"></i> Guardar
+            </button>
+            <button type="button" class="btn btn-danger" onclick="moduleDelete()">
+                <i class="fas fa-trash"></i> Eliminar
+            </button>
+        </div>
+        <div class="btn-group ms-2">
+            <button type="button" class="btn btn-secondary" onclick="moduleRefresh()">
+                <i class="fas fa-sync-alt"></i> Actualizar
+            </button>
+        </div>
+        {% block extra_buttons %}{% endblock %}
+    </div>
+
+    <!-- Search Bar -->
+    <div class="module-search mb-3">
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="fas fa-search"></i>
+            </span>
+            <input type="text" class="form-control" placeholder="Buscar..." 
+                   onkeyup="moduleSearch(this.value)">
+        </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="module-content">
+        {% block module_content %}
+        <!-- El contenido específico del módulo irá aquí -->
+        {% endblock %}
+    </div>
+</div>
+
+{% block module_scripts %}
+<script>
+function moduleNew() {
+    // Implementar en cada módulo
+    console.log('New item');
+}
+
+function moduleSave() {
+    // Implementar en cada módulo
+    console.log('Save item');
+}
+
+function moduleDelete() {
+    // Implementar en cada módulo
+    console.log('Delete item');
+}
+
+function moduleRefresh() {
+    // Implementar en cada módulo
+    console.log('Refresh data');
+}
+
+function moduleSearch(query) {
+    // Implementar en cada módulo
+    console.log('Search:', query);
+}
+</script>
+{% endblock %} 

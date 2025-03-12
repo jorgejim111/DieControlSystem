@@ -1,0 +1,106 @@
+/* Estilos generales */
+body {
+    overflow-x: hidden;
+}
+
+/* Estilos para las ventanas MDI */
+.mdi-window {
+    position: relative;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.mdi-window-header {
+    padding: 0.75rem 1rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+}
+
+.mdi-window-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.mdi-window-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.mdi-window-control {
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    cursor: pointer;
+    color: #6c757d;
+}
+
+.mdi-window-control:hover {
+    color: #343a40;
+}
+
+.mdi-window-body {
+    padding: 1rem;
+    overflow: auto;
+}
+
+/* Estilos para ventana maximizada */
+.mdi-window.maximized {
+    position: fixed;
+    top: 56px; /* Altura del navbar */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100% !important;
+    height: calc(100vh - 56px) !important;
+    margin: 0;
+    z-index: 1050;
+}
+
+/* Estilos para ventana minimizada */
+.mdi-window.minimized {
+    height: auto !important;
+}
+
+.mdi-window.minimized .mdi-window-body {
+    display: none;
+}
+
+/* Estilos para la barra de tareas */
+.mdi-taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    padding: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 1060;
+}
+
+.mdi-taskbar-item {
+    padding: 0.25rem 0.75rem;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    cursor: pointer;
+}
+
+.mdi-taskbar-item:hover {
+    background: #e9ecef;
+}
+
+.mdi-taskbar-item.active {
+    background: #007bff;
+    color: white;
+    border-color: #0056b3;
+} 

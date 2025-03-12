@@ -1,0 +1,164 @@
+{% extends "components/base_module.html" %}
+
+{% block module_content %}
+<div class="row">
+    <!-- Form Column -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Detalles de Pulgada</h5>
+                <form id="inchForm">
+                    <input type="hidden" id="inchId" name="id">
+                    <div class="mb-3">
+                        <label for="inch" class="form-label">Pulgada</label>
+                        <input type="text" class="form-control" id="inch" name="inch" required>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Column -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="inchesTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Pulgada</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Los datos se cargarán dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block module_scripts %}
+{{ super() }}
+<script>
+let selectedId = null;
+
+function moduleNew() {
+    document.getElementById('inchForm').reset();
+    selectedId = null;
+    document.getElementById('inch').focus();
+}
+
+function moduleSave() {
+    const formData = {
+        inch: document.getElementById('inch').value
+    };
+    
+    if (selectedId) {
+        formData.id = selectedId;
+    }
+
+    // Aquí iría la llamada AJAX para guardar
+    fetch('/api/inches' + (selectedId ? '/' + selectedId : ''), {
+        method: selectedId ? 'PUT' : 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            moduleRefresh();
+            moduleNew();
+        } else {
+            alert(data.message || 'Error al guardar');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al guardar');
+    });
+}
+
+function moduleDelete() {
+    if (!selectedId) {
+        alert('Por favor, seleccione un registro para eliminar');
+        return;
+    }
+
+    if (!confirm('¿Está seguro de eliminar este registro?')) {
+        return;
+    }
+
+    // Aquí iría la llamada AJAX para eliminar
+    fetch('/api/inches/' + selectedId, {
+        method: 'DELETE'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            moduleRefresh();
+            moduleNew();
+        } else {
+            alert(data.message || 'Error al eliminar');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al eliminar');
+    });
+}
+
+function moduleRefresh() {
+    // Aquí iría la llamada AJAX para cargar datos
+    fetch('/api/inches')
+    .then(response => response.json())
+    .then(data => {
+        const tbody = document.querySelector('#inchesTable tbody');
+        tbody.innerHTML = '';
+        
+        data.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${item.id}</td>
+                <td>${item.inch}</td>
+                <td>
+                    <button class="btn btn-sm btn-info" onclick="editInch(${item.id}, '${item.inch}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al cargar los datos');
+    });
+}
+
+function editInch(id, inch) {
+    selectedId = id;
+    document.getElementById('inch').value = inch;
+    document.getElementById('inch').focus();
+}
+
+function moduleSearch(query) {
+    const tbody = document.querySelector('#inchesTable tbody');
+    const rows = tbody.getElementsByTagName('tr');
+    
+    for (let row of rows) {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(query.toLowerCase()) ? '' : 'none';
+    }
+}
+
+// Cargar datos al iniciar
+document.addEventListener('DOMContentLoaded', moduleRefresh);
+</script>
+{% endblock %} 
