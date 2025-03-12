@@ -1,6 +1,6 @@
 # Die Control System
 
-A comprehensive system for managing dies, workers, and maintenance in a manufacturing environment.
+Sistema de control y gestión de personal desarrollado con Python y PyQt5
 
 ## Features
 
@@ -66,4 +66,4 @@ DieControlSystem/
 
 ## License
 
-This project is proprietary and confidential. 
+This project is licensed under the MIT License.
