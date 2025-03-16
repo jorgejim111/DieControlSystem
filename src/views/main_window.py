@@ -1,13 +1,14 @@
 from PyQt5.QtWidgets import (QMainWindow, QMdiArea, QMenuBar, QMenu, 
-                            QAction, QApplication, QLabel, QWidget, QVBoxLayout, QMdiSubWindow)
+                            QAction, QApplication, QLabel, QWidget, QVBoxLayout, QMdiSubWindow, QHBoxLayout)
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt
 import os
 from .users_window import UsersWindow
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, user_info=None):
         super().__init__()
+        self.user_info = user_info
         self.setWindowTitle("Die Control System - MasterNet")
         self.setStyleSheet("""
             QMainWindow {
@@ -45,6 +46,13 @@ class MainWindow(QMainWindow):
                 background-color: #dee2e6;
                 margin: 5px 0px;
             }
+            QLabel#workerName {
+                font-size: 16px;
+                font-weight: bold;
+                color: #0056b3;
+                padding: 5px 15px;
+                letter-spacing: 0.5px;
+            }
         """)
         
         # Establecer el ícono de la ventana
@@ -60,6 +68,28 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout(central_widget)
         layout.setContentsMargins(0, 0, 0, 0)
         
+        # Crear widget para el encabezado (logo y nombre del trabajador)
+        header_widget = QWidget()
+        header_layout = QHBoxLayout(header_widget)
+        header_layout.setContentsMargins(10, 5, 10, 5)
+        
+        # Agregar el nombre del trabajador si está disponible
+        if self.user_info and 'worker_name' in self.user_info:
+            worker_label = QLabel(f"User:  {self.user_info['worker_name']}")
+            worker_label.setObjectName("workerName")
+            header_layout.addWidget(worker_label)
+        
+        # Agregar espacio flexible
+        header_layout.addStretch()
+        
+        # Configurar el logo
+        self.logo_label = QLabel()
+        self.setup_logo()
+        header_layout.addWidget(self.logo_label)
+        
+        # Agregar el encabezado al layout principal
+        layout.addWidget(header_widget)
+        
         # Configurar el área MDI
         self.mdi_area = QMdiArea()
         self.mdi_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
@@ -69,10 +99,6 @@ class MainWindow(QMainWindow):
         
         # Crear menú
         self.create_menu()
-        
-        # Configurar logo
-        self.logo_label = QLabel(self)
-        self.setup_logo()
         
         # Configurar ventana
         self.setMinimumSize(800, 600)
@@ -120,27 +146,16 @@ class MainWindow(QMainWindow):
         dies_menu.addAction(manage_dies_action)
 
     def setup_logo(self):
-        # Configurar el logo en la parte superior derecha
+        # Configurar el logo
         logo_path = os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'logo_masternet.png')
         if os.path.exists(logo_path):
-            # Mostrar el logo en la ventana
             pixmap = QPixmap(logo_path)
             # Escalar el logo a un tamaño apropiado
             scaled_pixmap = pixmap.scaled(360, 100, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             self.logo_label.setPixmap(scaled_pixmap)
-            self.logo_label.setAlignment(Qt.AlignRight | Qt.AlignTop)
+            self.logo_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
             self.logo_label.setStyleSheet("background-color: transparent; padding: 5px;")
             self.logo_label.setFixedSize(scaled_pixmap.size())
-            
-            # Posicionar el logo en la esquina superior derecha
-            self.logo_label.raise_()  # Traer el logo al frente
-            self.logo_label.move(self.width() - self.logo_label.width() - 10, 35)
-
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        # Actualizar la posición del logo cuando se redimensiona la ventana
-        if hasattr(self, 'logo_label'):
-            self.logo_label.move(self.width() - self.logo_label.width() - 10, 35)
 
     def show_users_window(self):
         # Crear y mostrar la ventana de usuarios

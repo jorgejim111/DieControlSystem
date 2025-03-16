@@ -89,6 +89,10 @@ class Columns:
         DR_STATUS_ID = 'id_dr_status'
         UPDATE_TIME = 'updat_time'
 
+    class Lines:
+        ID = 'id_line'
+        LINE = 'Line'
+
 # Relaciones entre tablas
 class Relations:
     WORKER_POSITION = {
@@ -163,6 +167,7 @@ def get_table_columns(table_name: str) -> list:
         Tables.DIE_DESCRIPTION: vars(Columns.DieDescription),
         Tables.SERIALS: vars(Columns.Serials),
         Tables.DAMAGE_REPORT: vars(Columns.DamageReport),
+        Tables.LINE: vars(Columns.Lines),
     }
     
     return [col for col in columns_map.get(table_name, {}).values() 

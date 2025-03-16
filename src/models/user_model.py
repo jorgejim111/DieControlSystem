@@ -41,24 +41,28 @@ class UserModel:
         )
         return self.db.fetch_one(query, (user_id,))
     
-    def create_user(self, user_id: int, username: str, email: str, password: str, worker_id: Optional[int] = None) -> bool:
+    def createUser(self, username: str, email: str, password: str, workerId: int) -> bool:
         """Crea un nuevo usuario"""
         # Hash de la contraseña
-        hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         
         query = """
-            INSERT INTO {user} ({id}, {username}, {email}, {password}, {worker_id}, {create_time})
-            VALUES (%s, %s, %s, %s, %s, NOW())
+            INSERT INTO {users} (
+                {username}, {email}, {password}, {worker_id}
+            ) VALUES (%s, %s, %s, %s)
         """.format(
-            user=Tables.USER,
-            id=Columns.Users.ID,
+            users=Tables.USER,
             username=Columns.Users.USERNAME,
             email=Columns.Users.EMAIL,
             password=Columns.Users.PASSWORD,
-            worker_id=Columns.Users.WORKER_ID,
-            create_time=Columns.Users.CREATE_TIME
+            worker_id=Columns.Users.WORKER_ID
         )
-        return bool(self.db.execute_query(query, (user_id, username, email, hashed, worker_id)))
+        return bool(self.db.execute_query(query, (
+            username,
+            email,
+            hashed_password,
+            workerId
+        )))
     
     def update_user(self, user_id: int, username: str, email: str, worker_id: Optional[int] = None) -> bool:
         """Actualiza un usuario existente"""

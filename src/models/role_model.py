@@ -32,17 +32,16 @@ class RoleModel:
         )
         return self.db.fetch_one(query, (roleId,))
     
-    def createRole(self, roleId: int, roleName: str) -> bool:
+    def createRole(self, roleName: str) -> bool:
         """Crea un nuevo rol"""
         query = """
-            INSERT INTO {roles} ({id}, {role})
-            VALUES (%s, %s)
+            INSERT INTO {roles} ({role})
+            VALUES (%s)
         """.format(
             roles=Tables.ROLES,
-            id=Columns.Roles.ID,
             role=Columns.Roles.ROLE
         )
-        return bool(self.db.execute_query(query, (roleId, roleName)))
+        return bool(self.db.execute_query(query, (roleName,)))
     
     def updateRole(self, roleId: int, roleName: str) -> bool:
         """Actualiza un rol existente"""
