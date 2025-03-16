@@ -27,43 +27,60 @@ class DieDescriptionDialog(QDialog):
         self.setMinimumWidth(400)
         self.setStyleSheet("""
             QDialog {
-                background-color: #2b2d30;
+                background-color: white;
             }
             QLabel {
-                color: white;
+                color: #333333;
             }
             QLineEdit, QComboBox, QSpinBox {
                 padding: 5px;
-                border: 1px solid #3d3d3d;
+                border: 1px solid #cccccc;
                 border-radius: 3px;
-                background-color: #2b2d30;
-                color: white;
-                selection-background-color: #2d5a88;
+                background-color: white;
+                color: #333333;
+                selection-background-color: #0056b3;
             }
             QPushButton {
-                padding: 5px 15px;
-                border: 1px solid #3d3d3d;
-                border-radius: 3px;
-                background-color: #2b2d30;
+                background-color: #0056b3;
                 color: white;
+                border: none;
+                padding: 5px 15px;
+                border-radius: 3px;
+                min-width: 80px;
             }
             QPushButton:hover {
-                background-color: #3d3d3d;
+                background-color: #003d80;
             }
             QCheckBox {
-                color: white;
+                color: #333333;
             }
             QCheckBox::indicator {
                 width: 13px;
                 height: 13px;
+                border: 1px solid #cccccc;
             }
             QCheckBox::indicator:unchecked {
-                border: 1px solid #3d3d3d;
-                background: #2b2d30;
+                background: white;
             }
             QCheckBox::indicator:checked {
-                border: 1px solid #3d3d3d;
-                background: #2d5a88;
+                background: #0056b3;
+            }
+            QComboBox::drop-down {
+                border: none;
+            }
+            QComboBox::down-arrow {
+                image: url(down_arrow.png);
+                width: 12px;
+                height: 12px;
+            }
+            QComboBox:on {
+                border: 1px solid #0056b3;
+            }
+            QComboBox QAbstractItemView {
+                background-color: white;
+                color: #333333;
+                selection-background-color: #0056b3;
+                selection-color: white;
             }
         """)
 

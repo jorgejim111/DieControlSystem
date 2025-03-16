@@ -4,24 +4,25 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QFrame, QHBoxLayout,
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import Qt
 import os
-from models.description_model import DescriptionModel
-from views.description_dialog import DescriptionDialog
+from models.serial_model import SerialModel
+from views.dialogs.serial_dialog import SerialDialog
 
-class DescriptionsWindow(QWidget):
+class SerialWindow(QWidget):
     def __init__(self):
+        """Inicializa la ventana de serials"""
         super().__init__()
-        self.setWindowTitle("Descriptions Management")
+        self.setWindowTitle("Serials Management")
         
         # Establecer el ícono de la ventana
         iconPath = os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'icono.ico')
         if os.path.exists(iconPath):
             self.setWindowIcon(QIcon(iconPath))
             
-        self.description_model = DescriptionModel()
-        self.setupUI()
-        self.load_descriptions()
+        self.model = SerialModel()
+        self.setupUi()
+        self.loadData()
         
-    def setupUI(self):
+    def setupUi(self):
         # Layout principal
         mainLayout = QVBoxLayout()
         mainLayout.setContentsMargins(10, 10, 10, 10)
@@ -43,7 +44,7 @@ class DescriptionsWindow(QWidget):
         topLayout.setContentsMargins(5, 5, 5, 5)
         
         # Título de la sección
-        titleLabel = QLabel("Descriptions Management")
+        titleLabel = QLabel("Serials Management")
         titleLabel.setStyleSheet("font-size: 16px; font-weight: bold; color: #333;")
         topLayout.addWidget(titleLabel)
         
@@ -108,7 +109,7 @@ class DescriptionsWindow(QWidget):
         toolbar.addSpacerItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         
         # Botones
-        self.addButton = QPushButton("Add Description")
+        self.addButton = QPushButton("Add Serial")
         self.editButton = QPushButton("Edit")
         self.deleteButton = QPushButton("Delete")
         self.deleteButton.setObjectName("deleteButton")
@@ -119,95 +120,97 @@ class DescriptionsWindow(QWidget):
         
         contentLayout.addLayout(toolbar)
         
-        # Tabla de descriptions
-        self.descriptionsTable = QTableWidget()
-        self.descriptionsTable.setColumnCount(1)
-        self.descriptionsTable.setHorizontalHeaderLabels(['Description'])
+        # Tabla de serials
+        self.table = QTableWidget()
+        self.table.setColumnCount(7)
+        self.table.setHorizontalHeaderLabels([
+            "ID", "Serial", "Die Description", "Inner", "Outer", "Status", "ID Die"
+        ])
+        self.table.verticalHeader().setVisible(False)
+        self.table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.table.setSelectionMode(QTableWidget.SingleSelection)
+        self.table.setEditTriggers(QTableWidget.NoEditTriggers)
         
-        # Configurar la tabla
-        header = self.descriptionsTable.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.Stretch)
-        self.descriptionsTable.setSelectionBehavior(QTableWidget.SelectRows)
-        self.descriptionsTable.setSelectionMode(QTableWidget.SingleSelection)
-        self.descriptionsTable.setEditTriggers(QTableWidget.NoEditTriggers)
+        # Ajustar columnas
+        header = self.table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)  # ID
+        header.setSectionResizeMode(1, QHeaderView.ResizeToContents)  # Serial
+        header.setSectionResizeMode(2, QHeaderView.Stretch)  # Die Description
+        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)  # Inner
+        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)  # Outer
+        header.setSectionResizeMode(5, QHeaderView.ResizeToContents)  # Status
+        header.setSectionResizeMode(6, QHeaderView.ResizeToContents)  # ID Die
         
-        contentLayout.addWidget(self.descriptionsTable)
+        contentLayout.addWidget(self.table)
         mainLayout.addWidget(contentFrame)
         
+        # Ocultar columnas de IDs
+        self.table.setColumnHidden(0, True)  # ID Serial
+        self.table.setColumnHidden(6, True)  # ID Die
+        
         # Conectar señales
-        self.addButton.clicked.connect(self.show_add_dialog)
-        self.editButton.clicked.connect(self.edit_selected)
-        self.deleteButton.clicked.connect(self.delete_selected)
+        self.addButton.clicked.connect(self.addSerial)
+        self.editButton.clicked.connect(self.editSerial)
+        self.deleteButton.clicked.connect(self.deleteSerial)
         
         # Establecer un tamaño mínimo para la ventana
         self.setMinimumSize(800, 600)
 
-    def load_descriptions(self):
-        """Carga las descriptions en la tabla"""
-        self.descriptionsTable.setRowCount(0)
-        descriptions = self.description_model.get_all_descriptions()
+    def loadData(self):
+        """Carga los datos en la tabla"""
+        self.table.setRowCount(0)
+        serials = self.model.getAllSerials()
         
-        # Crear un diccionario para almacenar la relación entre description y su ID
-        self.description_ids = {}
-        
-        for row, description in enumerate(descriptions):
-            self.descriptionsTable.insertRow(row)
-            
-            # Description
-            description_item = QTableWidgetItem(description['Description'])
-            self.descriptionsTable.setItem(row, 0, description_item)
-            
-            # Guardar el ID asociado a esta description
-            self.description_ids[row] = description['id_description']
+        for i, serial in enumerate(serials):
+            self.table.insertRow(i)
+            self.table.setItem(i, 0, QTableWidgetItem(str(serial['id_serial'])))
+            self.table.setItem(i, 1, QTableWidgetItem(serial['Serial']))
+            self.table.setItem(i, 2, QTableWidgetItem(serial['DieDescription']))
+            self.table.setItem(i, 3, QTableWidgetItem(str(serial['inner'])))
+            self.table.setItem(i, 4, QTableWidgetItem(str(serial['outer'])))
+            self.table.setItem(i, 5, QTableWidgetItem(serial['StatusName']))
+            self.table.setItem(i, 6, QTableWidgetItem(str(serial['id_die_description'])))
 
-    def get_selected_description_id(self):
-        """Obtiene el ID de la description seleccionada"""
-        selectedItems = self.descriptionsTable.selectedItems()
+    def addSerial(self):
+        """Abre el diálogo para agregar un nuevo serial"""
+        dialog = SerialDialog(self)
+        if dialog.exec_():
+            self.loadData()
+
+    def editSerial(self):
+        """Abre el diálogo para editar el serial seleccionado"""
+        selectedItems = self.table.selectedItems()
         if not selectedItems:
-            return None
-        selectedRow = selectedItems[0].row()
-        return self.description_ids[selectedRow]
-
-    def show_add_dialog(self):
-        """Muestra el diálogo para agregar una nueva description"""
-        dialog = DescriptionDialog(self)
-        if dialog.exec_() == DescriptionDialog.Accepted:
-            self.load_descriptions()
-
-    def edit_selected(self):
-        """Edita la description seleccionada"""
-        description_id = self.get_selected_description_id()
-        if not description_id:
-            QMessageBox.warning(self, "Selection Required", "Please select a description to edit")
+            QMessageBox.warning(self, "Selection Required", "Please select a serial to edit")
             return
             
-        # Obtener los datos de la description
-        descriptions = self.description_model.get_all_descriptions()
-        description_data = next((desc for desc in descriptions if desc['id_description'] == description_id), None)
+        currentRow = self.table.currentRow()
+        serialId = int(self.table.item(currentRow, 0).text())
+        dialog = SerialDialog(self, serialId)
+        if dialog.exec_():
+            self.loadData()
+
+    def deleteSerial(self):
+        """Elimina el serial seleccionado"""
+        selectedItems = self.table.selectedItems()
+        if not selectedItems:
+            QMessageBox.warning(self, "Selection Required", "Please select a serial to delete")
+            return
+            
+        currentRow = self.table.currentRow()
+        serialId = int(self.table.item(currentRow, 0).text())
+        serialNumber = self.table.item(currentRow, 1).text()
         
-        if description_data:
-            dialog = DescriptionDialog(self, description_data)
-            if dialog.exec_() == DescriptionDialog.Accepted:
-                self.load_descriptions()
-
-    def delete_selected(self):
-        """Elimina la description seleccionada"""
-        description_id = self.get_selected_description_id()
-        if not description_id:
-            QMessageBox.warning(self, "Selection Required", "Please select a description to delete")
-            return
-            
         reply = QMessageBox.question(
             self,
             "Confirm Deletion",
-            "Are you sure you want to delete this description?",
+            f"Are you sure you want to delete serial {serialNumber}?",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )
         
         if reply == QMessageBox.Yes:
-            if self.description_model.delete_description(description_id):
-                self.load_descriptions()
-                QMessageBox.information(self, "Success", "Description deleted successfully!")
+            if self.model.deleteSerial(serialId):
+                self.loadData()
             else:
-                QMessageBox.critical(self, "Error", "Could not delete the description.") 
+                QMessageBox.critical(self, "Error", "Failed to delete serial") 

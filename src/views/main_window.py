@@ -1,10 +1,15 @@
 from PyQt5.QtWidgets import (QMainWindow, QMdiArea, QMenuBar, QMenu, 
-                            QAction, QApplication, QLabel, QWidget, QVBoxLayout, QMdiSubWindow, QHBoxLayout)
+                            QAction, QApplication, QLabel, QWidget, QVBoxLayout, QMdiSubWindow, QHBoxLayout, QPushButton)
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt
 import os
 from .users_window import UsersWindow
-from views.die_descriptions_window import DieDescriptionsWindow
+from .die_descriptions_window import DieDescriptionsWindow
+from .lines_window import LinesWindow
+from .status_window import StatusWindow
+from .products_window import ProductsWindow
+from .serial_window import SerialWindow
+from .descriptions_window import DescriptionsWindow
 
 class MainWindow(QMainWindow):
     def __init__(self, user_info=None):
@@ -150,6 +155,23 @@ class MainWindow(QMainWindow):
         # Agregar separador después de Users
         database_menu.addSeparator()
 
+        # Submenú Generals
+        generals_menu = QMenu("Generals", self)
+        database_menu.addMenu(generals_menu)
+        
+        # Acciones del menú Generals
+        lines_action = generals_menu.addAction("Lines")
+        lines_action.triggered.connect(self.show_lines_window)
+        
+        status_action = generals_menu.addAction("Status")
+        status_action.triggered.connect(self.show_status_window)
+        
+        products_action = generals_menu.addAction("Products")
+        products_action.triggered.connect(self.show_products_window)
+
+        # Agregar separador después de Generals
+        database_menu.addSeparator()
+
         # Submenú Die Description
         dies_menu = QMenu("Die Description", self)
         database_menu.addMenu(dies_menu)
@@ -168,6 +190,17 @@ class MainWindow(QMainWindow):
         
         description_action = dies_menu.addAction("Description")
         description_action.triggered.connect(self.show_description_window)
+
+        # Agregar separador después de Die Description
+        database_menu.addSeparator()
+
+        # Submenú Serials
+        serials_menu = QMenu("Serials", self)
+        database_menu.addMenu(serials_menu)
+
+        # Acciones del menú Serials
+        manage_serials_action = serials_menu.addAction("Manage Serials")
+        manage_serials_action.triggered.connect(self.show_serials_window)
 
     def setup_logo(self):
         # Configurar el logo
@@ -237,8 +270,7 @@ class MainWindow(QMainWindow):
 
     def show_description_window(self):
         """Muestra la ventana de gestión de descriptions"""
-        from views.description_window import DescriptionWindow
-        description_window = DescriptionWindow()
+        description_window = DescriptionsWindow()
         sub_window = QMdiSubWindow()
         sub_window.setWidget(description_window)
         sub_window.setAttribute(Qt.WA_DeleteOnClose)
@@ -250,6 +282,42 @@ class MainWindow(QMainWindow):
         die_descriptions_window = DieDescriptionsWindow()
         sub_window = QMdiSubWindow()
         sub_window.setWidget(die_descriptions_window)
+        sub_window.setAttribute(Qt.WA_DeleteOnClose)
+        self.mdi_area.addSubWindow(sub_window)
+        sub_window.show()
+
+    def show_lines_window(self):
+        """Muestra la ventana de gestión de líneas"""
+        lines_window = LinesWindow()
+        sub_window = QMdiSubWindow()
+        sub_window.setWidget(lines_window)
+        sub_window.setAttribute(Qt.WA_DeleteOnClose)
+        self.mdi_area.addSubWindow(sub_window)
+        sub_window.show()
+
+    def show_status_window(self):
+        """Muestra la ventana de gestión de status"""
+        status_window = StatusWindow()
+        sub_window = QMdiSubWindow()
+        sub_window.setWidget(status_window)
+        sub_window.setAttribute(Qt.WA_DeleteOnClose)
+        self.mdi_area.addSubWindow(sub_window)
+        sub_window.show()
+
+    def show_products_window(self):
+        """Muestra la ventana de gestión de productos"""
+        products_window = ProductsWindow()
+        sub_window = QMdiSubWindow()
+        sub_window.setWidget(products_window)
+        sub_window.setAttribute(Qt.WA_DeleteOnClose)
+        self.mdi_area.addSubWindow(sub_window)
+        sub_window.show()
+
+    def show_serials_window(self):
+        """Muestra la ventana de gestión de serials"""
+        serials_window = SerialWindow()
+        sub_window = QMdiSubWindow()
+        sub_window.setWidget(serials_window)
         sub_window.setAttribute(Qt.WA_DeleteOnClose)
         self.mdi_area.addSubWindow(sub_window)
         sub_window.show() 

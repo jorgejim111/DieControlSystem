@@ -4,22 +4,22 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QFrame, QHBoxLayout,
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import Qt
 import os
-from models.description_model import DescriptionModel
-from views.description_dialog import DescriptionDialog
+from models.line_model import LineModel
+from views.line_dialog import LineDialog
 
-class DescriptionsWindow(QWidget):
+class LinesWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Descriptions Management")
+        self.setWindowTitle("Lines Management")
         
         # Establecer el ícono de la ventana
         iconPath = os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'icono.ico')
         if os.path.exists(iconPath):
             self.setWindowIcon(QIcon(iconPath))
             
-        self.description_model = DescriptionModel()
+        self.lineModel = LineModel()
         self.setupUI()
-        self.load_descriptions()
+        self.loadLines()
         
     def setupUI(self):
         # Layout principal
@@ -43,7 +43,7 @@ class DescriptionsWindow(QWidget):
         topLayout.setContentsMargins(5, 5, 5, 5)
         
         # Título de la sección
-        titleLabel = QLabel("Descriptions Management")
+        titleLabel = QLabel("Lines Management")
         titleLabel.setStyleSheet("font-size: 16px; font-weight: bold; color: #333;")
         topLayout.addWidget(titleLabel)
         
@@ -108,7 +108,7 @@ class DescriptionsWindow(QWidget):
         toolbar.addSpacerItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         
         # Botones
-        self.addButton = QPushButton("Add Description")
+        self.addButton = QPushButton("Add Line")
         self.editButton = QPushButton("Edit")
         self.deleteButton = QPushButton("Delete")
         self.deleteButton.setObjectName("deleteButton")
@@ -119,95 +119,83 @@ class DescriptionsWindow(QWidget):
         
         contentLayout.addLayout(toolbar)
         
-        # Tabla de descriptions
-        self.descriptionsTable = QTableWidget()
-        self.descriptionsTable.setColumnCount(1)
-        self.descriptionsTable.setHorizontalHeaderLabels(['Description'])
+        # Tabla de líneas
+        self.linesTable = QTableWidget()
+        self.linesTable.setColumnCount(1)  # Solo Line
+        self.linesTable.setHorizontalHeaderLabels(['Line'])
         
         # Configurar la tabla
-        header = self.descriptionsTable.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.Stretch)
-        self.descriptionsTable.setSelectionBehavior(QTableWidget.SelectRows)
-        self.descriptionsTable.setSelectionMode(QTableWidget.SingleSelection)
-        self.descriptionsTable.setEditTriggers(QTableWidget.NoEditTriggers)
+        header = self.linesTable.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.Stretch)  # Line
         
-        contentLayout.addWidget(self.descriptionsTable)
+        self.linesTable.setSelectionBehavior(QTableWidget.SelectRows)
+        self.linesTable.setSelectionMode(QTableWidget.SingleSelection)
+        self.linesTable.setEditTriggers(QTableWidget.NoEditTriggers)
+        
+        contentLayout.addWidget(self.linesTable)
         mainLayout.addWidget(contentFrame)
         
         # Conectar señales
-        self.addButton.clicked.connect(self.show_add_dialog)
-        self.editButton.clicked.connect(self.edit_selected)
-        self.deleteButton.clicked.connect(self.delete_selected)
+        self.addButton.clicked.connect(self.addLine)
+        self.editButton.clicked.connect(self.editLine)
+        self.deleteButton.clicked.connect(self.deleteLine)
         
         # Establecer un tamaño mínimo para la ventana
         self.setMinimumSize(800, 600)
 
-    def load_descriptions(self):
-        """Carga las descriptions en la tabla"""
-        self.descriptionsTable.setRowCount(0)
-        descriptions = self.description_model.get_all_descriptions()
+    def loadLines(self):
+        """Carga las líneas en la tabla"""
+        self.linesTable.setRowCount(0)
+        lines_list = self.lineModel.getAllLines()
         
-        # Crear un diccionario para almacenar la relación entre description y su ID
-        self.description_ids = {}
-        
-        for row, description in enumerate(descriptions):
-            self.descriptionsTable.insertRow(row)
-            
-            # Description
-            description_item = QTableWidgetItem(description['Description'])
-            self.descriptionsTable.setItem(row, 0, description_item)
-            
-            # Guardar el ID asociado a esta description
-            self.description_ids[row] = description['id_description']
+        for row, line in enumerate(lines_list):
+            self.linesTable.insertRow(row)
+            # Almacenar el ID como datos del item pero mostrar solo la Line
+            item = QTableWidgetItem(line['Line'])
+            item.setData(Qt.UserRole, line['id_line'])
+            self.linesTable.setItem(row, 0, item)
 
-    def get_selected_description_id(self):
-        """Obtiene el ID de la description seleccionada"""
-        selectedItems = self.descriptionsTable.selectedItems()
+    def getSelectedLineId(self):
+        """Obtiene el ID de la línea seleccionada"""
+        selectedItems = self.linesTable.selectedItems()
         if not selectedItems:
             return None
-        selectedRow = selectedItems[0].row()
-        return self.description_ids[selectedRow]
+        return selectedItems[0].data(Qt.UserRole)
 
-    def show_add_dialog(self):
-        """Muestra el diálogo para agregar una nueva description"""
-        dialog = DescriptionDialog(self)
-        if dialog.exec_() == DescriptionDialog.Accepted:
-            self.load_descriptions()
+    def addLine(self):
+        """Abre el diálogo para agregar una nueva línea"""
+        dialog = LineDialog(self)
+        if dialog.exec_() == LineDialog.Accepted:
+            self.loadLines()
 
-    def edit_selected(self):
-        """Edita la description seleccionada"""
-        description_id = self.get_selected_description_id()
-        if not description_id:
-            QMessageBox.warning(self, "Selection Required", "Please select a description to edit")
+    def editLine(self):
+        """Abre el diálogo para editar una línea existente"""
+        line_id = self.getSelectedLineId()
+        if not line_id:
+            QMessageBox.warning(self, "Selection Required", "Please select a line to edit")
             return
             
-        # Obtener los datos de la description
-        descriptions = self.description_model.get_all_descriptions()
-        description_data = next((desc for desc in descriptions if desc['id_description'] == description_id), None)
-        
-        if description_data:
-            dialog = DescriptionDialog(self, description_data)
-            if dialog.exec_() == DescriptionDialog.Accepted:
-                self.load_descriptions()
+        dialog = LineDialog(self, line_id)
+        if dialog.exec_() == LineDialog.Accepted:
+            self.loadLines()
 
-    def delete_selected(self):
-        """Elimina la description seleccionada"""
-        description_id = self.get_selected_description_id()
-        if not description_id:
-            QMessageBox.warning(self, "Selection Required", "Please select a description to delete")
+    def deleteLine(self):
+        """Elimina la línea seleccionada"""
+        line_id = self.getSelectedLineId()
+        if not line_id:
+            QMessageBox.warning(self, "Selection Required", "Please select a line to delete")
             return
             
         reply = QMessageBox.question(
             self,
             "Confirm Deletion",
-            "Are you sure you want to delete this description?",
+            "Are you sure you want to delete this line?",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )
         
         if reply == QMessageBox.Yes:
-            if self.description_model.delete_description(description_id):
-                self.load_descriptions()
-                QMessageBox.information(self, "Success", "Description deleted successfully!")
+            if self.lineModel.deleteLine(line_id):
+                self.loadLines()
             else:
-                QMessageBox.critical(self, "Error", "Could not delete the description.") 
+                QMessageBox.critical(self, "Error", "Failed to delete line") 

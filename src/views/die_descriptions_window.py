@@ -121,23 +121,22 @@ class DieDescriptionsWindow(QWidget):
         
         # Tabla de die descriptions
         self.dieDescriptionsTable = QTableWidget()
-        self.dieDescriptionsTable.setColumnCount(9)
+        self.dieDescriptionsTable.setColumnCount(8)
         self.dieDescriptionsTable.setHorizontalHeaderLabels([
-            'ID', 'Die Description', 'Inch', 'Part', 'Description',
+            'Die Description', 'Inch', 'Part', 'Description',
             'Obsolet', 'Circulation', 'New', 'Last Update'
         ])
         
         # Configurar la tabla
         header = self.dieDescriptionsTable.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)  # ID
-        header.setSectionResizeMode(1, QHeaderView.Stretch)          # Die Description
-        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)  # Inch
-        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)  # Part
-        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)  # Description
-        header.setSectionResizeMode(5, QHeaderView.ResizeToContents)  # Obsolet
-        header.setSectionResizeMode(6, QHeaderView.ResizeToContents)  # Circulation
-        header.setSectionResizeMode(7, QHeaderView.ResizeToContents)  # New
-        header.setSectionResizeMode(8, QHeaderView.ResizeToContents)  # Last Update
+        header.setSectionResizeMode(0, QHeaderView.Stretch)          # Die Description
+        header.setSectionResizeMode(1, QHeaderView.ResizeToContents)  # Inch
+        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)  # Part
+        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)  # Description
+        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)  # Obsolet
+        header.setSectionResizeMode(5, QHeaderView.ResizeToContents)  # Circulation
+        header.setSectionResizeMode(6, QHeaderView.ResizeToContents)  # New
+        header.setSectionResizeMode(7, QHeaderView.ResizeToContents)  # Last Update
         
         self.dieDescriptionsTable.setSelectionBehavior(QTableWidget.SelectRows)
         self.dieDescriptionsTable.setSelectionMode(QTableWidget.SingleSelection)
@@ -165,41 +164,37 @@ class DieDescriptionsWindow(QWidget):
         for row, die_description in enumerate(die_descriptions):
             self.dieDescriptionsTable.insertRow(row)
             
-            # ID
-            id_item = QTableWidgetItem(str(die_description['id_die_description']))
-            self.dieDescriptionsTable.setItem(row, 0, id_item)
-            
             # Die Description
             description_item = QTableWidgetItem(die_description['Die_Description'])
-            self.dieDescriptionsTable.setItem(row, 1, description_item)
+            self.dieDescriptionsTable.setItem(row, 0, description_item)
             
             # Inch
             inch_item = QTableWidgetItem(die_description['Inch'])
-            self.dieDescriptionsTable.setItem(row, 2, inch_item)
+            self.dieDescriptionsTable.setItem(row, 1, inch_item)
             
             # Part
             part_item = QTableWidgetItem(die_description['Part'])
-            self.dieDescriptionsTable.setItem(row, 3, part_item)
+            self.dieDescriptionsTable.setItem(row, 2, part_item)
             
             # Description
             desc_item = QTableWidgetItem(die_description['Description'])
-            self.dieDescriptionsTable.setItem(row, 4, desc_item)
+            self.dieDescriptionsTable.setItem(row, 3, desc_item)
             
             # Obsolet
             obsolet_item = QTableWidgetItem('Yes' if die_description['Obsolet'] else 'No')
-            self.dieDescriptionsTable.setItem(row, 5, obsolet_item)
+            self.dieDescriptionsTable.setItem(row, 4, obsolet_item)
             
             # Circulation
             circulation_item = QTableWidgetItem(str(die_description['Circulation']))
-            self.dieDescriptionsTable.setItem(row, 6, circulation_item)
+            self.dieDescriptionsTable.setItem(row, 5, circulation_item)
             
             # New
             new_item = QTableWidgetItem(str(die_description['New']))
-            self.dieDescriptionsTable.setItem(row, 7, new_item)
+            self.dieDescriptionsTable.setItem(row, 6, new_item)
             
             # Last Update
             update_item = QTableWidgetItem(str(die_description['updat_time']))
-            self.dieDescriptionsTable.setItem(row, 8, update_item)
+            self.dieDescriptionsTable.setItem(row, 7, update_item)
             
             # Guardar el ID asociado a esta die description
             self.die_description_ids[row] = die_description['id_die_description']

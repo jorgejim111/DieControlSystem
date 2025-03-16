@@ -4,22 +4,22 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QFrame, QHBoxLayout,
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import Qt
 import os
-from models.description_model import DescriptionModel
-from views.description_dialog import DescriptionDialog
+from models.product_model import ProductModel
+from views.product_dialog import ProductDialog
 
-class DescriptionsWindow(QWidget):
+class ProductsWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Descriptions Management")
+        self.setWindowTitle("Products Management")
         
         # Establecer el ícono de la ventana
         iconPath = os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'icono.ico')
         if os.path.exists(iconPath):
             self.setWindowIcon(QIcon(iconPath))
             
-        self.description_model = DescriptionModel()
+        self.productModel = ProductModel()
         self.setupUI()
-        self.load_descriptions()
+        self.loadProducts()
         
     def setupUI(self):
         # Layout principal
@@ -43,7 +43,7 @@ class DescriptionsWindow(QWidget):
         topLayout.setContentsMargins(5, 5, 5, 5)
         
         # Título de la sección
-        titleLabel = QLabel("Descriptions Management")
+        titleLabel = QLabel("Products Management")
         titleLabel.setStyleSheet("font-size: 16px; font-weight: bold; color: #333;")
         topLayout.addWidget(titleLabel)
         
@@ -108,7 +108,7 @@ class DescriptionsWindow(QWidget):
         toolbar.addSpacerItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         
         # Botones
-        self.addButton = QPushButton("Add Description")
+        self.addButton = QPushButton("Add Product")
         self.editButton = QPushButton("Edit")
         self.deleteButton = QPushButton("Delete")
         self.deleteButton.setObjectName("deleteButton")
@@ -119,95 +119,88 @@ class DescriptionsWindow(QWidget):
         
         contentLayout.addLayout(toolbar)
         
-        # Tabla de descriptions
-        self.descriptionsTable = QTableWidget()
-        self.descriptionsTable.setColumnCount(1)
-        self.descriptionsTable.setHorizontalHeaderLabels(['Description'])
+        # Tabla de productos
+        self.productsTable = QTableWidget()
+        self.productsTable.setColumnCount(2)  # Product y Die Description
+        self.productsTable.setHorizontalHeaderLabels(['Product', 'Die Description'])
         
         # Configurar la tabla
-        header = self.descriptionsTable.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.Stretch)
-        self.descriptionsTable.setSelectionBehavior(QTableWidget.SelectRows)
-        self.descriptionsTable.setSelectionMode(QTableWidget.SingleSelection)
-        self.descriptionsTable.setEditTriggers(QTableWidget.NoEditTriggers)
+        header = self.productsTable.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.Stretch)  # Product
+        header.setSectionResizeMode(1, QHeaderView.Stretch)  # Die Description
         
-        contentLayout.addWidget(self.descriptionsTable)
+        self.productsTable.setSelectionBehavior(QTableWidget.SelectRows)
+        self.productsTable.setSelectionMode(QTableWidget.SingleSelection)
+        self.productsTable.setEditTriggers(QTableWidget.NoEditTriggers)
+        
+        contentLayout.addWidget(self.productsTable)
         mainLayout.addWidget(contentFrame)
         
         # Conectar señales
-        self.addButton.clicked.connect(self.show_add_dialog)
-        self.editButton.clicked.connect(self.edit_selected)
-        self.deleteButton.clicked.connect(self.delete_selected)
+        self.addButton.clicked.connect(self.addProduct)
+        self.editButton.clicked.connect(self.editProduct)
+        self.deleteButton.clicked.connect(self.deleteProduct)
         
         # Establecer un tamaño mínimo para la ventana
         self.setMinimumSize(800, 600)
 
-    def load_descriptions(self):
-        """Carga las descriptions en la tabla"""
-        self.descriptionsTable.setRowCount(0)
-        descriptions = self.description_model.get_all_descriptions()
+    def loadProducts(self):
+        """Carga los productos en la tabla"""
+        self.productsTable.setRowCount(0)
+        products_list = self.productModel.getAllProducts()
         
-        # Crear un diccionario para almacenar la relación entre description y su ID
-        self.description_ids = {}
-        
-        for row, description in enumerate(descriptions):
-            self.descriptionsTable.insertRow(row)
+        for row, product in enumerate(products_list):
+            self.productsTable.insertRow(row)
+            # Almacenar el ID como datos del item pero mostrar solo el Product
+            item_product = QTableWidgetItem(product['Product'])
+            item_product.setData(Qt.UserRole, product['id_product'])
+            self.productsTable.setItem(row, 0, item_product)
             
-            # Description
-            description_item = QTableWidgetItem(description['Description'])
-            self.descriptionsTable.setItem(row, 0, description_item)
-            
-            # Guardar el ID asociado a esta description
-            self.description_ids[row] = description['id_description']
+            # Mostrar la descripción del die
+            item_die = QTableWidgetItem(product['DieDescription'])
+            self.productsTable.setItem(row, 1, item_die)
 
-    def get_selected_description_id(self):
-        """Obtiene el ID de la description seleccionada"""
-        selectedItems = self.descriptionsTable.selectedItems()
+    def getSelectedProductId(self):
+        """Obtiene el ID del producto seleccionado"""
+        selectedItems = self.productsTable.selectedItems()
         if not selectedItems:
             return None
-        selectedRow = selectedItems[0].row()
-        return self.description_ids[selectedRow]
+        return self.productsTable.item(selectedItems[0].row(), 0).data(Qt.UserRole)
 
-    def show_add_dialog(self):
-        """Muestra el diálogo para agregar una nueva description"""
-        dialog = DescriptionDialog(self)
-        if dialog.exec_() == DescriptionDialog.Accepted:
-            self.load_descriptions()
+    def addProduct(self):
+        """Abre el diálogo para agregar un nuevo producto"""
+        dialog = ProductDialog(self)
+        if dialog.exec_() == ProductDialog.Accepted:
+            self.loadProducts()
 
-    def edit_selected(self):
-        """Edita la description seleccionada"""
-        description_id = self.get_selected_description_id()
-        if not description_id:
-            QMessageBox.warning(self, "Selection Required", "Please select a description to edit")
+    def editProduct(self):
+        """Abre el diálogo para editar un producto existente"""
+        product_id = self.getSelectedProductId()
+        if not product_id:
+            QMessageBox.warning(self, "Selection Required", "Please select a product to edit")
             return
             
-        # Obtener los datos de la description
-        descriptions = self.description_model.get_all_descriptions()
-        description_data = next((desc for desc in descriptions if desc['id_description'] == description_id), None)
-        
-        if description_data:
-            dialog = DescriptionDialog(self, description_data)
-            if dialog.exec_() == DescriptionDialog.Accepted:
-                self.load_descriptions()
+        dialog = ProductDialog(self, product_id)
+        if dialog.exec_() == ProductDialog.Accepted:
+            self.loadProducts()
 
-    def delete_selected(self):
-        """Elimina la description seleccionada"""
-        description_id = self.get_selected_description_id()
-        if not description_id:
-            QMessageBox.warning(self, "Selection Required", "Please select a description to delete")
+    def deleteProduct(self):
+        """Elimina el producto seleccionado"""
+        product_id = self.getSelectedProductId()
+        if not product_id:
+            QMessageBox.warning(self, "Selection Required", "Please select a product to delete")
             return
             
         reply = QMessageBox.question(
             self,
             "Confirm Deletion",
-            "Are you sure you want to delete this description?",
+            "Are you sure you want to delete this product?",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )
         
         if reply == QMessageBox.Yes:
-            if self.description_model.delete_description(description_id):
-                self.load_descriptions()
-                QMessageBox.information(self, "Success", "Description deleted successfully!")
+            if self.productModel.deleteProduct(product_id):
+                self.loadProducts()
             else:
-                QMessageBox.critical(self, "Error", "Could not delete the description.") 
+                QMessageBox.critical(self, "Error", "Failed to delete product") 

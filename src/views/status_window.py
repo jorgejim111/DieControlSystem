@@ -4,22 +4,22 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QFrame, QHBoxLayout,
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import Qt
 import os
-from models.description_model import DescriptionModel
-from views.description_dialog import DescriptionDialog
+from models.status_model import StatusModel
+from views.status_dialog import StatusDialog
 
-class DescriptionsWindow(QWidget):
+class StatusWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Descriptions Management")
+        self.setWindowTitle("Status Management")
         
         # Establecer el ícono de la ventana
         iconPath = os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'icono.ico')
         if os.path.exists(iconPath):
             self.setWindowIcon(QIcon(iconPath))
             
-        self.description_model = DescriptionModel()
+        self.statusModel = StatusModel()
         self.setupUI()
-        self.load_descriptions()
+        self.loadStatus()
         
     def setupUI(self):
         # Layout principal
@@ -43,7 +43,7 @@ class DescriptionsWindow(QWidget):
         topLayout.setContentsMargins(5, 5, 5, 5)
         
         # Título de la sección
-        titleLabel = QLabel("Descriptions Management")
+        titleLabel = QLabel("Status Management")
         titleLabel.setStyleSheet("font-size: 16px; font-weight: bold; color: #333;")
         topLayout.addWidget(titleLabel)
         
@@ -108,7 +108,7 @@ class DescriptionsWindow(QWidget):
         toolbar.addSpacerItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
         
         # Botones
-        self.addButton = QPushButton("Add Description")
+        self.addButton = QPushButton("Add Status")
         self.editButton = QPushButton("Edit")
         self.deleteButton = QPushButton("Delete")
         self.deleteButton.setObjectName("deleteButton")
@@ -119,95 +119,83 @@ class DescriptionsWindow(QWidget):
         
         contentLayout.addLayout(toolbar)
         
-        # Tabla de descriptions
-        self.descriptionsTable = QTableWidget()
-        self.descriptionsTable.setColumnCount(1)
-        self.descriptionsTable.setHorizontalHeaderLabels(['Description'])
+        # Tabla de status
+        self.statusTable = QTableWidget()
+        self.statusTable.setColumnCount(1)  # Solo Status
+        self.statusTable.setHorizontalHeaderLabels(['Status'])
         
         # Configurar la tabla
-        header = self.descriptionsTable.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.Stretch)
-        self.descriptionsTable.setSelectionBehavior(QTableWidget.SelectRows)
-        self.descriptionsTable.setSelectionMode(QTableWidget.SingleSelection)
-        self.descriptionsTable.setEditTriggers(QTableWidget.NoEditTriggers)
+        header = self.statusTable.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.Stretch)  # Status
         
-        contentLayout.addWidget(self.descriptionsTable)
+        self.statusTable.setSelectionBehavior(QTableWidget.SelectRows)
+        self.statusTable.setSelectionMode(QTableWidget.SingleSelection)
+        self.statusTable.setEditTriggers(QTableWidget.NoEditTriggers)
+        
+        contentLayout.addWidget(self.statusTable)
         mainLayout.addWidget(contentFrame)
         
         # Conectar señales
-        self.addButton.clicked.connect(self.show_add_dialog)
-        self.editButton.clicked.connect(self.edit_selected)
-        self.deleteButton.clicked.connect(self.delete_selected)
+        self.addButton.clicked.connect(self.addStatus)
+        self.editButton.clicked.connect(self.editStatus)
+        self.deleteButton.clicked.connect(self.deleteStatus)
         
         # Establecer un tamaño mínimo para la ventana
         self.setMinimumSize(800, 600)
 
-    def load_descriptions(self):
-        """Carga las descriptions en la tabla"""
-        self.descriptionsTable.setRowCount(0)
-        descriptions = self.description_model.get_all_descriptions()
+    def loadStatus(self):
+        """Carga los status en la tabla"""
+        self.statusTable.setRowCount(0)
+        status_list = self.statusModel.getAllStatus()
         
-        # Crear un diccionario para almacenar la relación entre description y su ID
-        self.description_ids = {}
-        
-        for row, description in enumerate(descriptions):
-            self.descriptionsTable.insertRow(row)
-            
-            # Description
-            description_item = QTableWidgetItem(description['Description'])
-            self.descriptionsTable.setItem(row, 0, description_item)
-            
-            # Guardar el ID asociado a esta description
-            self.description_ids[row] = description['id_description']
+        for row, status in enumerate(status_list):
+            self.statusTable.insertRow(row)
+            # Almacenar el ID como datos del item pero mostrar solo el Status
+            item = QTableWidgetItem(status['Status'])
+            item.setData(Qt.UserRole, status['id_status'])
+            self.statusTable.setItem(row, 0, item)
 
-    def get_selected_description_id(self):
-        """Obtiene el ID de la description seleccionada"""
-        selectedItems = self.descriptionsTable.selectedItems()
+    def getSelectedStatusId(self):
+        """Obtiene el ID del status seleccionado"""
+        selectedItems = self.statusTable.selectedItems()
         if not selectedItems:
             return None
-        selectedRow = selectedItems[0].row()
-        return self.description_ids[selectedRow]
+        return selectedItems[0].data(Qt.UserRole)
 
-    def show_add_dialog(self):
-        """Muestra el diálogo para agregar una nueva description"""
-        dialog = DescriptionDialog(self)
-        if dialog.exec_() == DescriptionDialog.Accepted:
-            self.load_descriptions()
+    def addStatus(self):
+        """Abre el diálogo para agregar un nuevo status"""
+        dialog = StatusDialog(self)
+        if dialog.exec_() == StatusDialog.Accepted:
+            self.loadStatus()
 
-    def edit_selected(self):
-        """Edita la description seleccionada"""
-        description_id = self.get_selected_description_id()
-        if not description_id:
-            QMessageBox.warning(self, "Selection Required", "Please select a description to edit")
+    def editStatus(self):
+        """Abre el diálogo para editar un status existente"""
+        status_id = self.getSelectedStatusId()
+        if not status_id:
+            QMessageBox.warning(self, "Selection Required", "Please select a status to edit")
             return
             
-        # Obtener los datos de la description
-        descriptions = self.description_model.get_all_descriptions()
-        description_data = next((desc for desc in descriptions if desc['id_description'] == description_id), None)
-        
-        if description_data:
-            dialog = DescriptionDialog(self, description_data)
-            if dialog.exec_() == DescriptionDialog.Accepted:
-                self.load_descriptions()
+        dialog = StatusDialog(self, status_id)
+        if dialog.exec_() == StatusDialog.Accepted:
+            self.loadStatus()
 
-    def delete_selected(self):
-        """Elimina la description seleccionada"""
-        description_id = self.get_selected_description_id()
-        if not description_id:
-            QMessageBox.warning(self, "Selection Required", "Please select a description to delete")
+    def deleteStatus(self):
+        """Elimina el status seleccionado"""
+        status_id = self.getSelectedStatusId()
+        if not status_id:
+            QMessageBox.warning(self, "Selection Required", "Please select a status to delete")
             return
             
         reply = QMessageBox.question(
             self,
             "Confirm Deletion",
-            "Are you sure you want to delete this description?",
+            "Are you sure you want to delete this status?",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )
         
         if reply == QMessageBox.Yes:
-            if self.description_model.delete_description(description_id):
-                self.load_descriptions()
-                QMessageBox.information(self, "Success", "Description deleted successfully!")
+            if self.statusModel.deleteStatus(status_id):
+                self.loadStatus()
             else:
-                QMessageBox.critical(self, "Error", "Could not delete the description.") 
+                QMessageBox.critical(self, "Error", "Failed to delete status") 
