@@ -1,0 +1,5 @@
+[33mcommit a9ef9482ce8bd01cce058eeb9181837aff1afa1d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/die-description-module-v2[m[33m)[m
+Author: jorgejim111 <jorgejim111@gmail.com>
+Date:   Sun Mar 16 14:32:21 2025 -0400
+
+    Implementación del módulo Die Description: 1. Modelo con validación de duplicados y ordenamiento por Inch, Description, Part 2. Diálogo con autogeneración del campo Die Description 3. Integración en el menú principal

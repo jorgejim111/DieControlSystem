@@ -4,6 +4,7 @@ from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt
 import os
 from .users_window import UsersWindow
+from views.die_descriptions_window import DieDescriptionsWindow
 
 class MainWindow(QMainWindow):
     def __init__(self, user_info=None):
@@ -105,45 +106,68 @@ class MainWindow(QMainWindow):
         self.showMaximized()
 
     def create_menu(self):
+        # Crear la barra de menú
         menubar = self.menuBar()
-        
-        # Crear menú Database
+        menubar.setStyleSheet("""
+            QMenuBar {
+                background-color: white;
+                color: #333333;
+            }
+            QMenuBar::item:selected {
+                background-color: #f8f9fa;
+            }
+            QMenu {
+                background-color: white;
+                color: #333333;
+                border: 1px solid #cccccc;
+            }
+            QMenu::item:selected {
+                background-color: #f8f9fa;
+                color: #333333;
+            }
+        """)
+
+        # Menú Database
         database_menu = menubar.addMenu("Database")
-        database_menu.setStyleSheet("QMenu { font-size: 12px; }")
         
-        # Crear submenú Users
+        # Submenú Users
         users_menu = QMenu("Users", self)
-        users_menu.setStyleSheet("QMenu { font-size: 12px; }")
         database_menu.addMenu(users_menu)
         
-        # Crear acciones para el menú Users
-        manage_users_action = QAction("Manage Users", self)
+        # Acciones del menú Users
+        manage_users_action = users_menu.addAction("Manage Users")
         manage_users_action.triggered.connect(self.show_users_window)
         
-        positions_action = QAction("Positions", self)
+        positions_action = users_menu.addAction("Positions")
         positions_action.triggered.connect(self.show_positions_window)
         
-        workers_action = QAction("Workers", self)
+        workers_action = users_menu.addAction("Workers")
         workers_action.triggered.connect(self.show_workers_window)
         
-        roles_action = QAction("Roles", self)
+        roles_action = users_menu.addAction("Roles")
         roles_action.triggered.connect(self.show_roles_window)
+
+        # Agregar separador después de Users
+        database_menu.addSeparator()
+
+        # Submenú Die Description
+        dies_menu = QMenu("Die Description", self)
+        database_menu.addMenu(dies_menu)
+
+        # Acciones del menú Die Description
+        manage_dies_action = dies_menu.addAction("Manage Die Description")
+        manage_dies_action.triggered.connect(self.show_die_descriptions_window)
         
-        # Agregar acciones al menú Users
-        users_menu.addAction(manage_users_action)
-        users_menu.addAction(positions_action)
-        users_menu.addAction(workers_action)
-        users_menu.addAction(roles_action)
+        dies_menu.addSeparator()
         
-        users_menu.addSeparator()  # Agregar separador
+        inches_action = dies_menu.addAction("Inches")
+        inches_action.triggered.connect(self.show_inches_window)
         
-        # Crear submenú Dies
-        dies_menu = database_menu.addMenu("Dies")
+        parts_action = dies_menu.addAction("Parts")
+        parts_action.triggered.connect(self.show_parts_window)
         
-        # Acción Manage Dies
-        manage_dies_action = QAction("Manage Dies", self)
-        manage_dies_action.triggered.connect(self.show_dies_window)
-        dies_menu.addAction(manage_dies_action)
+        description_action = dies_menu.addAction("Description")
+        description_action.triggered.connect(self.show_description_window)
 
     def setup_logo(self):
         # Configurar el logo
@@ -187,6 +211,45 @@ class MainWindow(QMainWindow):
         roles_window = RolesWindow()
         sub_window = QMdiSubWindow()
         sub_window.setWidget(roles_window)
+        sub_window.setAttribute(Qt.WA_DeleteOnClose)
+        self.mdi_area.addSubWindow(sub_window)
+        sub_window.show()
+
+    def show_inches_window(self):
+        """Muestra la ventana de gestión de inches"""
+        from views.inches_window import InchesWindow
+        inches_window = InchesWindow()
+        sub_window = QMdiSubWindow()
+        sub_window.setWidget(inches_window)
+        sub_window.setAttribute(Qt.WA_DeleteOnClose)
+        self.mdi_area.addSubWindow(sub_window)
+        sub_window.show()
+
+    def show_parts_window(self):
+        """Muestra la ventana de gestión de parts"""
+        from views.parts_window import PartsWindow
+        parts_window = PartsWindow()
+        sub_window = QMdiSubWindow()
+        sub_window.setWidget(parts_window)
+        sub_window.setAttribute(Qt.WA_DeleteOnClose)
+        self.mdi_area.addSubWindow(sub_window)
+        sub_window.show()
+
+    def show_description_window(self):
+        """Muestra la ventana de gestión de descriptions"""
+        from views.description_window import DescriptionWindow
+        description_window = DescriptionWindow()
+        sub_window = QMdiSubWindow()
+        sub_window.setWidget(description_window)
+        sub_window.setAttribute(Qt.WA_DeleteOnClose)
+        self.mdi_area.addSubWindow(sub_window)
+        sub_window.show()
+
+    def show_die_descriptions_window(self):
+        """Muestra la ventana de gestión de die descriptions"""
+        die_descriptions_window = DieDescriptionsWindow()
+        sub_window = QMdiSubWindow()
+        sub_window.setWidget(die_descriptions_window)
         sub_window.setAttribute(Qt.WA_DeleteOnClose)
         self.mdi_area.addSubWindow(sub_window)
         sub_window.show() 
