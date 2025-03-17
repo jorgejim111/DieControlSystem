@@ -64,6 +64,18 @@ class Columns:
         CREATE_TIME = 'create_time'
         UPDATE_TIME = 'updat_time'
 
+    class DRDescription:
+        ID = 'id_dr_description'
+        DESCRIPTION = 'description'
+
+    class Explanation:
+        ID = 'id_explanetion'
+        EXPLANATION = 'explanetion'
+
+    class DRStatus:
+        ID = 'id_dr_status'
+        STATUS = 'Status'
+
     class Serials:
         ID = 'id_serial'
         SERIAL = 'Serial'
@@ -83,7 +95,7 @@ class Columns:
         LINE_ID = 'id_line'
         PRODUCT_ID = 'id_product'
         DR_DESCRIPTION_ID = 'id_dr_description'
-        EXPLANATION_ID = 'id_explanation'
+        EXPLANATION_ID = 'id_explanetion'
         SAMPLE = 'Sample'
         NOTE = 'Note'
         DR_STATUS_ID = 'id_dr_status'

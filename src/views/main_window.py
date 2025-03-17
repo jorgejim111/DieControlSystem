@@ -10,6 +10,9 @@ from .status_window import StatusWindow
 from .products_window import ProductsWindow
 from .serial_window import SerialWindow
 from .descriptions_window import DescriptionsWindow
+from .dr_description_window import DRDescriptionWindow
+from .explanations_window import ExplanationsWindow
+from .dr_status_window import DRStatusWindow
 
 class MainWindow(QMainWindow):
     def __init__(self, user_info=None):
@@ -194,6 +197,23 @@ class MainWindow(QMainWindow):
         # Agregar separador después de Die Description
         database_menu.addSeparator()
 
+        # Submenú Damage Report
+        damage_report_menu = QMenu("Damage Report", self)
+        database_menu.addMenu(damage_report_menu)
+
+        # Acciones del menú Damage Report
+        dr_description_action = damage_report_menu.addAction("DR Description")
+        dr_description_action.triggered.connect(self.show_dr_description_window)
+        
+        explanations_action = damage_report_menu.addAction("Explanations")
+        explanations_action.triggered.connect(self.show_explanations_window)
+        
+        dr_status_action = damage_report_menu.addAction("Status")
+        dr_status_action.triggered.connect(self.show_dr_status_window)
+
+        # Agregar separador después de Damage Report
+        database_menu.addSeparator()
+
         # Submenú Serials
         serials_menu = QMenu("Serials", self)
         database_menu.addMenu(serials_menu)
@@ -320,4 +340,22 @@ class MainWindow(QMainWindow):
         sub_window.setWidget(serials_window)
         sub_window.setAttribute(Qt.WA_DeleteOnClose)
         self.mdi_area.addSubWindow(sub_window)
+        sub_window.show()
+
+    def show_dr_description_window(self):
+        """Muestra la ventana de gestión de DR Description"""
+        dr_description_window = DRDescriptionWindow()
+        sub_window = self.mdi_area.addSubWindow(dr_description_window)
+        sub_window.show()
+
+    def show_explanations_window(self):
+        """Muestra la ventana de gestión de Explanations"""
+        explanations_window = ExplanationsWindow()
+        sub_window = self.mdi_area.addSubWindow(explanations_window)
+        sub_window.show()
+
+    def show_dr_status_window(self):
+        """Muestra la ventana de gestión de estados de DR"""
+        dr_status_window = DRStatusWindow()
+        sub_window = self.mdi_area.addSubWindow(dr_status_window)
         sub_window.show() 
