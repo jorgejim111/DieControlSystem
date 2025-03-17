@@ -22,7 +22,7 @@
 
 ### Historial Completo
 ```
-[nuevo-hash] - Implementación completa del módulo de Seriales
+a418aba - Implementación completa del módulo de Seriales
 aabf1de - Implementación completa del módulo Die Description
 a9ef948 - Implementación inicial del módulo Die Description
 b43a806 - Mejoras en la interfaz de usuario
